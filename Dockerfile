@@ -71,18 +71,17 @@ RUN mkdir /home/stor2rrd \
 
 # fetch source code from https://github.com/XoruX/apps-docker
 RUN echo "fetching source" \
-    && cd /tmp \
-    && wget https://github.com/XoruX/apps-docker/archive/master.zip \
+    && wget --quiet https://github.com/XoruX/apps-docker/archive/2.70.tar.gz -O /tmp/xorux.tar.gz \
     && mkdir -p /usr/src/xorux \
     && cd /usr/src/xorux \
-    && unzip  /tmp/master.zip \
-    && rm  /tmp/master.zip
+    && tar -xzf /tmp/xorux.tar.gz --strip-components=1 \
+    && rm /tmp/xorux.tar.gz
 
-WORKDIR /usr/src/xorux/apps-docker-master
+WORKDIR /usr/src/xorux
 
 # configure Apache
+RUN mkdir /etc/apache2/conf && mv configs/apache2/htpasswd /etc/apache2/conf/
 RUN mv configs/apache2 /etc/apache2/sites-available
-RUN mv configs/apache2/htpasswd /etc/apache2/conf/
 
 # change apache user to lpar2rrd
 RUN sed -i 's/^User apache/User lpar2rrd/g' /etc/apache2/httpd.conf
@@ -90,7 +89,7 @@ RUN sed -i 's/^User apache/User lpar2rrd/g' /etc/apache2/httpd.conf
 # adding web root
 RUN echo "adding web root" \
     && cd /var/www/localhost \
-    && tar -xf /usr/src/xorux/apps-docker-master/htdocs.tar.gz \
+    && tar -xf /usr/src/xorux/htdocs.tar.gz \
     && chown -R apache.apache /var/www/localhost \
     && chmod a+w /var/www/localhost/htdocs/js/env.js
 
@@ -114,6 +113,8 @@ RUN chmod 640 /var/spool/cron/crontabs/lpar2rrd && chown lpar2rrd.cron /var/spoo
 RUN mv tz.pl /var/www/localhost/cgi-bin/tz.pl
 RUN chmod +x /var/www/localhost/cgi-bin/tz.pl
 
+RUN mv startup.sh /startup.sh && chmod +x /startup.sh
+
 # download tarballs from official website
 ADD https://lpar2rrd.com/download-static/lpar2rrd-$LPAR_VER.tar /home/lpar2rrd/
 ADD https://stor2rrd.com/download-static/stor2rrd-$STOR_VER.tar /home/stor2rrd/
@@ -126,8 +127,6 @@ WORKDIR /home/stor2rrd
 RUN tar -xvf stor2rrd-$STOR_VER.tar && rm stor2rrd-$STOR_VER.tar
 
 COPY supervisord.conf /etc/
-
-RUN mv startup.sh /startup.sh && chmod +x /startup.sh
 
 RUN mkdir -p /home/lpar2rrd/lpar2rrd /home/stor2rrd/stor2rrd
 RUN chown -R lpar2rrd /home/lpar2rrd /home/stor2rrd
