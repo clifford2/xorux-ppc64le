@@ -1,6 +1,7 @@
 # XoruX Docker Image
 
 This is Dockerfile for building of [XoruX](https://www.xorux.com) applications - [LPAR2RRD](https://www.lpar2rrd.com) & [STOR2RRD](https://www.stor2rrd.com) for **ppc64le** systems.
+**No longer maintained - please see [clifford2/lpar2rrd](https://github.com/clifford2/lpar2rrd) instead.**
 
 Using source code from <https://github.com/XoruX/apps-docker>,
 with modified `Dockerfile`.
